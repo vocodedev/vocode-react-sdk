@@ -15,6 +15,8 @@ import {
   StopMessage,
 } from "../types/vocode/websocket";
 
+const VOCODE_API_URL = "api.vocode.dev";
+
 export const useConversation = (
   config: ConversationConfig
 ): {
@@ -112,21 +114,18 @@ export const useConversation = (
       audioContext.resume();
     }
 
-    const resp = await fetch(
-      `https://${process.env.REACT_APP_BACKEND_URL}/auth/token`,
-      {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${process.env.REACT_APP_VOCODE_API_KEY}`,
-        },
-      }
-    );
+    const resp = await fetch(`https://${VOCODE_API_URL}/auth/token`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${config.vocodeConfig.apiKey}`,
+      },
+    });
     const data = await resp.json();
     const token = data.token;
 
     const socket = new WebSocket(
-      `wss://${process.env.REACT_APP_BACKEND_URL}/conversation?key=${token}`
+      `wss://${VOCODE_API_URL}/conversation?key=${token}`
     );
     socket.onerror = (error) => {
       setStatus("error");

@@ -11,11 +11,16 @@ export type AudioDeviceConfig = {
   outputSamplingRate?: number;
 };
 
+export type VocodeConfig = {
+  apiKey: string;
+};
+
 export type ConversationConfig = {
   audioDeviceConfig: AudioDeviceConfig;
   transcriberConfig: Omit<TranscriberConfig, "samplingRate" | "audioEncoding">;
   agentConfig: AgentConfig;
   synthesizerConfig: Omit<SynthesizerConfig, "samplingRate" | "audioEncoding">;
+  vocodeConfig: VocodeConfig;
 };
 
 export type AudioMetadata = {
