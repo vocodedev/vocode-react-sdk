@@ -9,7 +9,7 @@
     "prepublish": "npx tsc"
   },
   "keywords": [],
-  "author": "Ajay Raj",
+  "author": "Ajay Raj <ajay@vocode.dev>",
   "license": "MIT",
   "devDependencies": {
     "typescript": "^4.9.5"
