@@ -1,0 +1,22 @@
+{
+  "name": "vocode",
+  "version": "1.0.0",
+  "description": "",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "scripts": {
+    "build": "npx tsc",
+    "prepublish": "npx tsc"
+  },
+  "keywords": [],
+  "author": "Ajay Raj",
+  "license": "MIT",
+  "devDependencies": {
+    "typescript": "^4.9.5"
+  },
+  "dependencies": {
+    "extendable-media-recorder": "^7.1.5",
+    "extendable-media-recorder-wav-encoder": "^7.0.84",
+    "snake-case": "^3.0.4"
+  }
+}
