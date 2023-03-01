@@ -4,7 +4,6 @@ import {
   register,
 } from "extendable-media-recorder";
 import { connect } from "extendable-media-recorder-wav-encoder";
-import { Buffer } from "buffer";
 import React from "react";
 import { ConversationConfig, ConversationStatus } from "../types/conversation";
 import { blobToBase64, stringify } from "../utils";
@@ -14,6 +13,9 @@ import {
   StartMessage,
   StopMessage,
 } from "../types/vocode/websocket";
+import { DeepgramTranscriberConfig, TranscriberConfig } from "../types";
+import { isSafari, isChrome } from "react-device-detect";
+import { Buffer } from "buffer";
 
 const VOCODE_API_URL = "api.vocode.dev";
 
@@ -35,16 +37,17 @@ export const useConversation = (
 
   // get audio context and metadata about user audio
   React.useEffect(() => {
-    const audioContext = new window.AudioContext();
+    const audioContext = new AudioContext();
     setAudioContext(audioContext);
-    setAudioAnalyser(audioContext.createAnalyser());
+    const audioAnalyser = audioContext.createAnalyser();
+    setAudioAnalyser(audioAnalyser);
   }, []);
 
   // once the conversation is connected, stream the microphone audio into the socket
   React.useEffect(() => {
     if (!recorder || !socket) return;
     if (status === "connected") {
-      recorder.ondataavailable = ({ data }: { data: Blob }) => {
+      recorder.addEventListener("dataavailable", ({ data }: { data: Blob }) => {
         blobToBase64(data).then((base64Encoded: string | null) => {
           if (!base64Encoded) return;
           const audioMessage: AudioMessage = {
@@ -54,7 +57,7 @@ export const useConversation = (
           socket.readyState === WebSocket.OPEN &&
             socket.send(stringify(audioMessage));
         });
-      };
+      });
     }
   }, [recorder, socket, status]);
 
@@ -66,7 +69,7 @@ export const useConversation = (
     registerWav().catch(console.error);
   }, []);
 
-  // when audio comes into the queue, play it to the user
+  // play audio that is queued
   React.useEffect(() => {
     const playArrayBuffer = (arrayBuffer: ArrayBuffer) => {
       audioContext &&
@@ -97,7 +100,6 @@ export const useConversation = (
     setStatus(status);
     if (!recorder || !socket) return;
     recorder.stop();
-    audioAnalyser && audioAnalyser.disconnect();
     const stopMessage: StopMessage = {
       type: "stop",
     };
@@ -109,6 +111,11 @@ export const useConversation = (
   const startConversation = async () => {
     if (!audioContext || !audioAnalyser) return;
     setStatus("connecting");
+
+    if (!isSafari && !isChrome) {
+      stopConversation("error");
+      return;
+    }
 
     if (audioContext.state === "suspended") {
       audioContext.resume();
@@ -133,8 +140,7 @@ export const useConversation = (
     socket.onmessage = (event) => {
       const message = JSON.parse(event.data);
       if (message.type === "audio") {
-        const audio = Buffer.from(message.data, "base64");
-        setAudioQueue((prev) => [...prev, audio]);
+        setAudioQueue((prev) => [...prev, Buffer.from(message.data, "base64")]);
       } else if (message.type === "ready") {
         setStatus("connected");
       }
@@ -154,16 +160,21 @@ export const useConversation = (
       }, 100);
     });
 
-    console.log(await navigator.mediaDevices.enumerateDevices());
     let audioStream;
     try {
+      const trackConstraints: MediaTrackConstraints = {
+        echoCancellation: true,
+      };
+      if (config.audioDeviceConfig.inputDeviceId) {
+        console.log(
+          "Using input device",
+          config.audioDeviceConfig.inputDeviceId
+        );
+        trackConstraints.deviceId = config.audioDeviceConfig.inputDeviceId;
+      }
       audioStream = await navigator.mediaDevices.getUserMedia({
         video: false,
-        audio: {
-          // echoCancellation: true,
-          // autoGainControl: true,
-          deviceId: config.audioDeviceConfig.inputDeviceId,
-        },
+        audio: trackConstraints,
       });
     } catch (error) {
       if (error instanceof DOMException && error.name === "NotAllowedError") {
@@ -176,27 +187,27 @@ export const useConversation = (
       return;
     }
     const micSettings = audioStream.getAudioTracks()[0].getSettings();
+    console.log(micSettings);
     const inputAudioMetadata = {
       samplingRate: micSettings.sampleRate || audioContext.sampleRate,
       audioEncoding: "linear16" as AudioEncoding,
     };
     console.log("Input audio metadata", inputAudioMetadata);
 
-    if (!("setSinkId" in AudioContext.prototype)) {
-      alert("Upgrade to Chrome 110 to talk to the bot.");
-      stopConversation("error");
-      return;
-    }
-    if (config.audioDeviceConfig.outputDeviceId !== "default") {
-      // @ts-ignore - setSinkId is not in the typescript definition
-      await audioContext.setSinkId(config.audioDeviceConfig.outputDeviceId);
-    }
     const outputAudioMetadata = {
       samplingRate:
         config.audioDeviceConfig.outputSamplingRate || audioContext.sampleRate,
       audioEncoding: "linear16" as AudioEncoding,
     };
     console.log("Output audio metadata", inputAudioMetadata);
+
+    let transcriberConfig: TranscriberConfig = Object.assign(
+      config.transcriberConfig,
+      inputAudioMetadata
+    );
+    if (isSafari && transcriberConfig.type === "deepgram") {
+      (transcriberConfig as DeepgramTranscriberConfig).downsampling = 2;
+    }
 
     const startMessage: StartMessage = {
       type: "start",

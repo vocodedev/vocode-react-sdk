@@ -15,6 +15,7 @@ export interface DeepgramTranscriberConfig extends TranscriberConfig {
   tier?: string;
   shouldWarmupModel?: boolean;
   version?: string;
+  downsampling?: number;
 }
 
 export interface GoogleTranscriberConfig extends TranscriberConfig {

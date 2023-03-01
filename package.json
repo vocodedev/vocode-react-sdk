@@ -17,6 +17,7 @@
   "dependencies": {
     "extendable-media-recorder": "^7.1.5",
     "extendable-media-recorder-wav-encoder": "^7.0.84",
+    "react-device-detect": "^2.2.3",
     "snake-case": "^3.0.4"
   }
 }
