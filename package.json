@@ -2,6 +2,7 @@
   "name": "vocode",
   "version": "1.0.5",
   "description": "",
+  "homepage": "https://vocode.dev",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
   "scripts": {
