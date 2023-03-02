@@ -3,6 +3,10 @@
   "version": "1.0.6",
   "description": "",
   "homepage": "https://vocode.dev",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/vocodedev/vocode-react-sdk.git"
+  },
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
   "scripts": {
