@@ -2,28 +2,32 @@ import type { TranscriberConfig } from "./transcriber";
 import type { AgentConfig } from "./agent";
 import type { SynthesizerConfig } from "./synthesizer";
 
-export type WebSocketMessageType = "start" | "audio" | "ready" | "stop";
+export type WebSocketMessageType =
+  | "websocket_start"
+  | "websocket_audio"
+  | "websocket_ready"
+  | "websocket_stop";
 
 export interface WebSocketMessage {
   type: WebSocketMessageType;
 }
 
 export interface StartMessage extends WebSocketMessage {
-  type: "start";
+  type: "websocket_start";
   transcriberConfig: TranscriberConfig;
   agentConfig: AgentConfig;
   synthesizerConfig: SynthesizerConfig;
 }
 
 export interface AudioMessage extends WebSocketMessage {
-  type: "audio";
+  type: "websocket_audio";
   data: string;
 }
 
 export interface ReadyMessage extends WebSocketMessage {
-  type: "ready";
+  type: "websocket_ready";
 }
 
 export interface StopMessage extends WebSocketMessage {
-  type: "stop";
+  type: "websocket_stop";
 }

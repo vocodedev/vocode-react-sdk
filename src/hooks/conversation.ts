@@ -51,7 +51,7 @@ export const useConversation = (
         blobToBase64(data).then((base64Encoded: string | null) => {
           if (!base64Encoded) return;
           const audioMessage: AudioMessage = {
-            type: "audio",
+            type: "websocket_audio",
             data: base64Encoded,
           };
           socket.readyState === WebSocket.OPEN &&
@@ -101,7 +101,7 @@ export const useConversation = (
     if (!recorder || !socket) return;
     recorder.stop();
     const stopMessage: StopMessage = {
-      type: "stop",
+      type: "websocket_stop",
     };
     socket.send(stringify(stopMessage));
     ![WebSocket.CLOSING, WebSocket.CLOSED].includes(socket.readyState) &&
@@ -210,7 +210,7 @@ export const useConversation = (
     }
 
     const startMessage: StartMessage = {
-      type: "start",
+      type: "websocket_start",
       transcriberConfig: Object.assign(
         config.transcriberConfig,
         inputAudioMetadata

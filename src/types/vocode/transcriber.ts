@@ -1,6 +1,9 @@
 import { AudioEncoding } from "./audioEncoding";
 
-export type TranscriberType = "deepgram" | "google";
+export type TranscriberType =
+  | "transcriber_deepgram"
+  | "transcriber_google"
+  | "transcriber_assembly_ai";
 
 export interface TranscriberConfig {
   type: string;
@@ -10,7 +13,7 @@ export interface TranscriberConfig {
 }
 
 export interface DeepgramTranscriberConfig extends TranscriberConfig {
-  type: "deepgram";
+  type: "transcriber_deepgram";
   model?: string;
   tier?: string;
   shouldWarmupModel?: boolean;
@@ -19,7 +22,12 @@ export interface DeepgramTranscriberConfig extends TranscriberConfig {
 }
 
 export interface GoogleTranscriberConfig extends TranscriberConfig {
-  type: "google";
+  type: "transcriber_google";
   model?: string;
+  shouldWarmupModel?: boolean;
+}
+
+export interface AssemblyAITranscriberConfig extends TranscriberConfig {
+  type: "transcriber_assembly_ai";
   shouldWarmupModel?: boolean;
 }

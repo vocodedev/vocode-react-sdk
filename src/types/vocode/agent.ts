@@ -1,25 +1,37 @@
-export type AgentType = "llm" | "echo";
+export type AgentType =
+  | "agent_llm"
+  | "agent_echo"
+  | "agent_chat_gpt"
+  | "agent_chat_gpt_alpha"
+  | "agent_restful_user_implemented"
+  | "agent_websocket_user_implemented";
 
 export interface AgentConfig {
-  type: string;
+  type: AgentType;
   initialMessage?: string;
   generateResponses?: boolean;
 }
 
 export interface LLMAgentConfig extends AgentConfig {
-  type: "llm";
+  type: "agent_llm";
   promptPreamble: string;
   expectedFirstPrompt?: string;
 }
 
 export interface ChatGPTAgentConfig extends AgentConfig {
-  type: "chat_gpt";
+  type: "agent_chat_gpt";
+  promptPreamble: string;
+  expectedFirstPrompt?: string;
+}
+
+export interface ChatGPTAlphaAgentConfig extends AgentConfig {
+  type: "agent_chat_gpt_alpha";
   promptPreamble: string;
   expectedFirstPrompt?: string;
 }
 
 export interface EchoAgentConfig extends AgentConfig {
-  type: "echo";
+  type: "agent_echo";
 }
 
 export interface RESTfulEndpointConfig {
@@ -28,7 +40,7 @@ export interface RESTfulEndpointConfig {
 }
 
 export interface RESTfulUserImplementedAgentConfig extends AgentConfig {
-  type: "restful_user_implemented";
+  type: "agent_restful_user_implemented";
   respond: RESTfulEndpointConfig;
 }
 
@@ -37,6 +49,6 @@ export interface WebSocketRouteConfig {
 }
 
 export interface WebSocketUserImplementedAgentConfig extends AgentConfig {
-  type: "websocket_user_implemented";
+  type: "agent_websocket_user_implemented";
   respond: WebSocketRouteConfig;
 }
