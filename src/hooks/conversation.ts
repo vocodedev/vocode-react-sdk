@@ -139,9 +139,9 @@ export const useConversation = (
     };
     socket.onmessage = (event) => {
       const message = JSON.parse(event.data);
-      if (message.type === "audio") {
+      if (message.type === "websocket_audio") {
         setAudioQueue((prev) => [...prev, Buffer.from(message.data, "base64")]);
-      } else if (message.type === "ready") {
+      } else if (message.type === "websocket_ready") {
         setStatus("connected");
       }
     };
@@ -205,7 +205,7 @@ export const useConversation = (
       config.transcriberConfig,
       inputAudioMetadata
     );
-    if (isSafari && transcriberConfig.type === "deepgram") {
+    if (isSafari && transcriberConfig.type === "transcriber_deepgram") {
       (transcriberConfig as DeepgramTranscriberConfig).downsampling = 2;
     }
 
