@@ -15,11 +15,12 @@ export interface EndpointingConfig {
 
 export interface TimeEndpointingConfig extends EndpointingConfig {
   type: "endpointing_time_based";
-  timeCutoffSeconds: number;
+  timeCutoffSeconds?: number;
 }
 
 export interface PunctuationEndpointingConfig extends EndpointingConfig {
   type: "endpointing_punctuation_based";
+  timeCutoffSeconds?: number;
 }
 
 export interface TranscriberConfig {
