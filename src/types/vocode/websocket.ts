@@ -17,6 +17,7 @@ export interface StartMessage extends WebSocketMessage {
   transcriberConfig: TranscriberConfig;
   agentConfig: AgentConfig;
   synthesizerConfig: SynthesizerConfig;
+  conversationId?: string;
 }
 
 export interface AudioMessage extends WebSocketMessage {

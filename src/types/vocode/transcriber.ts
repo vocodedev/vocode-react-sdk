@@ -5,11 +5,29 @@ export type TranscriberType =
   | "transcriber_google"
   | "transcriber_assembly_ai";
 
+export type EndpointingType =
+  | "endpointing_time_based"
+  | "endpointing_punctuation_based";
+
+export interface EndpointingConfig {
+  type: EndpointingType;
+}
+
+export interface TimeEndpointingConfig extends EndpointingConfig {
+  type: "endpointing_time_based";
+  timeCutoffSeconds: number;
+}
+
+export interface PunctuationEndpointingConfig extends EndpointingConfig {
+  type: "endpointing_punctuation_based";
+}
+
 export interface TranscriberConfig {
   type: string;
   samplingRate: number;
   audioEncoding: AudioEncoding;
   chunkSize: number;
+  endpointingConfig?: EndpointingConfig;
 }
 
 export interface DeepgramTranscriberConfig extends TranscriberConfig {

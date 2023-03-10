@@ -1,3 +1,5 @@
+import { BaseMessage } from "./message";
+
 export type AgentType =
   | "agent_llm"
   | "agent_echo"
@@ -8,8 +10,9 @@ export type AgentType =
 
 export interface AgentConfig {
   type: AgentType;
-  initialMessage?: string;
+  initialMessage?: BaseMessage;
   generateResponses?: boolean;
+  endConversationOnGoodbye?: boolean;
 }
 
 export interface LLMAgentConfig extends AgentConfig {
