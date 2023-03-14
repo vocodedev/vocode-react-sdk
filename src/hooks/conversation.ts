@@ -220,6 +220,7 @@ export const useConversation = (
         config.synthesizerConfig,
         outputAudioMetadata
       ),
+      conversationId: config.vocodeConfig.conversationId,
     };
 
     socket.send(stringify(startMessage));
