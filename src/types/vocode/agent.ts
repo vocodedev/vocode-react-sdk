@@ -40,6 +40,7 @@ export interface ChatGPTAgentConfig extends AgentConfig {
   type: "agent_chat_gpt";
   promptPreamble: string;
   expectedFirstPrompt?: string;
+  modelName?: string;
   temperature?: number;
   maxTokens?: number;
   cutOffResponse?: CutOffResponse;
