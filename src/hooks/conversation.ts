@@ -121,7 +121,9 @@ export const useConversation = (
       audioContext.resume();
     }
 
-    const resp = await fetch(`https://${VOCODE_API_URL}/auth/token`, {
+    const baseUrl = config.vocodeConfig.baseUrl || VOCODE_API_URL;
+
+    const resp = await fetch(`https://${baseUrl}/auth/token`, {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
@@ -131,9 +133,7 @@ export const useConversation = (
     const data = await resp.json();
     const token = data.token;
 
-    const socket = new WebSocket(
-      `wss://${VOCODE_API_URL}/conversation?key=${token}`
-    );
+    const socket = new WebSocket(`wss://${baseUrl}/conversation?key=${token}`);
     socket.onerror = (error) => {
       setStatus("error");
     };
