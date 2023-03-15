@@ -8,29 +8,41 @@ export type AgentType =
   | "agent_restful_user_implemented"
   | "agent_websocket_user_implemented";
 
+export interface FillerAudioConfig {
+  silenceThresholdSeconds?: number;
+  usePhrases?: boolean;
+  useTypingNoise?: boolean;
+}
+
 export interface AgentConfig {
   type: AgentType;
   initialMessage?: BaseMessage;
   generateResponses?: boolean;
   endConversationOnGoodbye?: boolean;
+  sendFillerAudio?: boolean | FillerAudioConfig;
+}
+
+export interface CutOffResponse {
+  messages?: string[];
 }
 
 export interface LLMAgentConfig extends AgentConfig {
   type: "agent_llm";
   promptPreamble: string;
   expectedFirstPrompt?: string;
+  modelName?: string;
+  temperature?: number;
+  maxTokens?: number;
+  cutOffResponse?: CutOffResponse;
 }
 
 export interface ChatGPTAgentConfig extends AgentConfig {
   type: "agent_chat_gpt";
   promptPreamble: string;
   expectedFirstPrompt?: string;
-}
-
-export interface ChatGPTAlphaAgentConfig extends AgentConfig {
-  type: "agent_chat_gpt_alpha";
-  promptPreamble: string;
-  expectedFirstPrompt?: string;
+  temperature?: number;
+  maxTokens?: number;
+  cutOffResponse?: CutOffResponse;
 }
 
 export interface EchoAgentConfig extends AgentConfig {
