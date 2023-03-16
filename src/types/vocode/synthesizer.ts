@@ -14,6 +14,9 @@ export interface SynthesizerConfig {
 
 export interface AzureSynthesizerConfig extends SynthesizerConfig {
   type: "synthesizer_azure";
+  voiceName?: string;
+  pitch?: number;
+  rate?: number;
 }
 export interface GoogleSynthesizerConfig extends SynthesizerConfig {
   type: "synthesizer_google";
