@@ -13,7 +13,13 @@
     "build": "npx tsc",
     "prepublish": "npx tsc"
   },
-  "keywords": [],
+  "keywords": [
+    "conversation",
+    "voice",
+    "voicebot",
+    "chatbot",
+    "audio"
+  ],
   "author": "Ajay Raj <ajay@vocode.dev>",
   "license": "MIT",
   "devDependencies": {
