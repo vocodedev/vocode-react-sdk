@@ -25,6 +25,7 @@ export const useConversation = (
   status: ConversationStatus;
   start: () => void;
   stop: () => void;
+  error: Error | undefined;
   analyserNode: AnalyserNode | undefined;
 } => {
   const [audioContext, setAudioContext] = React.useState<AudioContext>();
@@ -34,6 +35,7 @@ export const useConversation = (
   const [recorder, setRecorder] = React.useState<IMediaRecorder>();
   const [socket, setSocket] = React.useState<WebSocket>();
   const [status, setStatus] = React.useState<ConversationStatus>("idle");
+  const [error, setError] = React.useState<Error>();
 
   // get audio context and metadata about user audio
   React.useEffect(() => {
@@ -95,9 +97,14 @@ export const useConversation = (
     }
   }, [audioQueue, processing]);
 
-  const stopConversation = (status: ConversationStatus = "idle") => {
+  const stopConversation = (error?: Error) => {
     setAudioQueue([]);
-    setStatus(status);
+    if (error) {
+      setError(error);
+      setStatus("error");
+    } else {
+      setStatus("idle");
+    }
     if (!recorder || !socket) return;
     recorder.stop();
     const stopMessage: StopMessage = {
@@ -113,7 +120,7 @@ export const useConversation = (
     setStatus("connecting");
 
     if (!isSafari && !isChrome) {
-      stopConversation("error");
+      stopConversation(new Error("Unsupported browser"));
       return;
     }
 
@@ -181,9 +188,10 @@ export const useConversation = (
         alert(
           "Allowlist this site at chrome://settings/content/microphone to talk to the bot."
         );
+        error = new Error("Microphone access denied");
       }
       console.error(error);
-      stopConversation("error");
+      stopConversation(error as Error);
       return;
     }
     const micSettings = audioStream.getAudioTracks()[0].getSettings();
@@ -243,6 +251,7 @@ export const useConversation = (
     status,
     start: startConversation,
     stop: stopConversation,
+    error,
     analyserNode: audioAnalyser,
   };
 };
