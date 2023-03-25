@@ -142,9 +142,9 @@ export const useConversation = (
 
     setError(undefined);
     const socket = new WebSocket(`wss://${baseUrl}/conversation?key=${token}`);
+    let error: Error | undefined;
     socket.onerror = (event) => {
-      const error = new Error(event.toString());
-      setError(error);
+      error = new Error(JSON.stringify(event));
     };
     socket.onmessage = (event) => {
       const message = JSON.parse(event.data);
