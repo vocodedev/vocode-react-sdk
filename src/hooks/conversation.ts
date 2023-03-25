@@ -140,9 +140,11 @@ export const useConversation = (
     const data = await resp.json();
     const token = data.token;
 
+    setError(undefined);
     const socket = new WebSocket(`wss://${baseUrl}/conversation?key=${token}`);
-    socket.onerror = (error) => {
-      setStatus("error");
+    socket.onerror = (event) => {
+      const error = new Error(event.toString());
+      setError(error);
     };
     socket.onmessage = (event) => {
       const message = JSON.parse(event.data);
@@ -153,7 +155,7 @@ export const useConversation = (
       }
     };
     socket.onclose = () => {
-      stopConversation();
+      stopConversation(error);
     };
     setSocket(socket);
 
