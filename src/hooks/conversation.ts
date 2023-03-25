@@ -144,7 +144,8 @@ export const useConversation = (
     const socket = new WebSocket(`wss://${baseUrl}/conversation?key=${token}`);
     let error: Error | undefined;
     socket.onerror = (event) => {
-      error = new Error(JSON.stringify(event));
+      console.error(event);
+      error = new Error("See console for error details");
     };
     socket.onmessage = (event) => {
       const message = JSON.parse(event.data);
