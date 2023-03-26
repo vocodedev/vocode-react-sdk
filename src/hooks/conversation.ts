@@ -17,7 +17,7 @@ import { DeepgramTranscriberConfig, TranscriberConfig } from "../types";
 import { isSafari, isChrome } from "react-device-detect";
 import { Buffer } from "buffer";
 
-const VOCODE_API_URL = "vocode-api-5xerktxr4q-uc.a.run.app";
+const VOCODE_API_URL = "api.vocode.dev";
 
 export const useConversation = (
   config: ConversationConfig
