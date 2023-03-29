@@ -247,7 +247,7 @@ export const useConversation = (
       setRecorder(recorderToUse);
     }
 
-    recorderToUse.start(10);
+    recorderToUse.start(1000);
   };
 
   return {
