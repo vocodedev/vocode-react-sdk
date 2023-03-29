@@ -247,7 +247,11 @@ export const useConversation = (
       setRecorder(recorderToUse);
     }
 
-    recorderToUse.start(1000);
+    recorderToUse.start(
+      Math.round(
+        (1000 * transcriberConfig.chunkSize) / transcriberConfig.samplingRate
+      )
+    );
   };
 
   return {
