@@ -25,6 +25,15 @@ export type ConversationConfig = {
   vocodeConfig: VocodeConfig;
 };
 
+export type SelfHostedConversationConfig = {
+  backendUrl: string;
+  audioDeviceConfig: AudioDeviceConfig;
+  conversationId?: string;
+  timeSlice?: number;
+  chunkSize?: number;
+  downsampling?: number;
+};
+
 export type AudioMetadata = {
   samplingRate: number;
   audioEncoding: AudioEncoding;
