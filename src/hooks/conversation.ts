@@ -327,6 +327,13 @@ export const useConversation = (
       timeSlice = 10;
     }
 
+    if (recorderToUse.state === "recording") {
+      // When the recorder is in the recording state, see:
+      // https://developer.mozilla.org/en-US/docs/Web/API/MediaRecorder/state
+      // which is not expected to call `start()` according to:
+      // https://developer.mozilla.org/en-US/docs/Web/API/MediaRecorder/start.
+      return;
+    }
     recorderToUse.start(timeSlice);
   };
 
