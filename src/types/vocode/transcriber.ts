@@ -44,6 +44,7 @@ export interface GoogleTranscriberConfig extends TranscriberConfig {
   type: "transcriber_google";
   model?: string;
   shouldWarmupModel?: boolean;
+  languageCode?: string
 }
 
 export interface AssemblyAITranscriberConfig extends TranscriberConfig {
