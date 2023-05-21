@@ -23,6 +23,8 @@
   "author": "Ajay Raj <ajay@vocode.dev>",
   "license": "MIT",
   "devDependencies": {
+    "@types/node": "^20.2.3",
+    "@types/react": "^18.2.6",
     "typescript": "^4.9.5"
   },
   "dependencies": {
