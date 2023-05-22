@@ -21,6 +21,7 @@ import {
 import { DeepgramTranscriberConfig, TranscriberConfig } from "../types";
 import { isSafari, isChrome } from "react-device-detect";
 import { Buffer } from "buffer";
+import { useCookies } from 'react-cookie';
 
 const VOCODE_API_URL = "api.vocode.dev";
 const DEFAULT_CHUNK_SIZE = 2048;
@@ -42,6 +43,7 @@ export const useConversation = (
   const [socket, setSocket] = React.useState<WebSocket>();
   const [status, setStatus] = React.useState<ConversationStatus>("idle");
   const [error, setError] = React.useState<Error>();
+  const [cookies] = useCookies(['sessionId']);
 
   // get audio context and metadata about user audio
   React.useEffect(() => {
@@ -165,6 +167,7 @@ export const useConversation = (
         outputAudioMetadata
       ),
       conversationId: config.vocodeConfig.conversationId,
+      sessionId: cookies.sessionId,
     };
   };
 

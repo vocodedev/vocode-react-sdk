@@ -20,6 +20,7 @@ export interface StartMessage extends WebSocketMessage {
   agentConfig: AgentConfig;
   synthesizerConfig: SynthesizerConfig;
   conversationId?: string;
+  sessionId?: string;
 }
 
 export interface InputAudioConfig {
