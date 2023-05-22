@@ -6,6 +6,7 @@ import { AudioEncoding } from "./audioEncoding";
 export type WebSocketMessageType =
   | "websocket_start"
   | "websocket_audio"
+  | "websocket_audio_ext"
   | "websocket_ready"
   | "websocket_stop"
   | "websocket_audio_config_start";
@@ -44,6 +45,13 @@ export interface AudioConfigStartMessage extends WebSocketMessage {
 export interface AudioMessage extends WebSocketMessage {
   type: "websocket_audio";
   data: string;
+}
+
+export interface AudioMessageExt extends WebSocketMessage {
+  type: "websocket_audio_ext";
+  data: string;
+  human_message: string;
+  bot_message: string;
 }
 
 export interface ReadyMessage extends WebSocketMessage {

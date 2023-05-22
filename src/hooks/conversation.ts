@@ -213,7 +213,7 @@ export const useConversation = (
     };
     socket.onmessage = (event) => {
       const message = JSON.parse(event.data);
-      if (message.type === "websocket_audio") {
+      if (message.type === "websocket_audio" || message.type === "websocket_audio_ext") {
         setAudioQueue((prev) => [...prev, Buffer.from(message.data, "base64")]);
       } else if (message.type === "websocket_ready") {
         setStatus("connected");
