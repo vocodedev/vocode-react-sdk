@@ -21,6 +21,7 @@ import {
 import { DeepgramTranscriberConfig, TranscriberConfig } from "../types";
 import { isSafari, isChrome } from "react-device-detect";
 import { Buffer } from "buffer";
+import { v4 as uuidv4 } from "uuid"
 
 const VOCODE_API_URL = "api.vocode.dev";
 const DEFAULT_CHUNK_SIZE = 2048;
@@ -173,7 +174,7 @@ export const useConversation = (
     outputAudioMetadata: { samplingRate: number; audioEncoding: AudioEncoding },
     chunkSize: number | undefined,
     downsampling: number | undefined,
-    conversationId: string | undefined
+    conversationId: string | undefined,
   ): AudioConfigStartMessage => ({
     type: "websocket_audio_config_start",
     inputAudioConfig: {
@@ -293,17 +294,27 @@ export const useConversation = (
     } else {
       const selfHostedConversationConfig =
         config as SelfHostedConversationConfig;
+      let conversationId = selfHostedConversationConfig.conversationId;
+      if (!conversationId) {
+        let sessionId = sessionStorage.getItem("sessionId");
+        if (sessionId == undefined) {
+          sessionId = uuidv4();
+          sessionStorage.setItem("sessionId", sessionId);
+        }
+        conversationId = sessionId;
+      }
       startMessage = getAudioConfigStartMessage(
         inputAudioMetadata,
         outputAudioMetadata,
         selfHostedConversationConfig.chunkSize,
         selfHostedConversationConfig.downsampling,
-        selfHostedConversationConfig.conversationId
+        conversationId,
       );
     }
 
     socket.send(stringify(startMessage));
     console.log("Access to microphone granted");
+    console.log(startMessage);
 
     let recorderToUse = recorder;
     if (recorderToUse && recorderToUse.state === "paused") {
