@@ -175,7 +175,6 @@ export const useConversation = (
     chunkSize: number | undefined,
     downsampling: number | undefined,
     conversationId: string | undefined,
-    sessionId: string | undefined,
   ): AudioConfigStartMessage => ({
     type: "websocket_audio_config_start",
     inputAudioConfig: {
@@ -189,7 +188,6 @@ export const useConversation = (
       audioEncoding: outputAudioMetadata.audioEncoding,
     },
     conversationId,
-    sessionId,
   });
 
   const startConversation = async () => {
@@ -296,23 +294,27 @@ export const useConversation = (
     } else {
       const selfHostedConversationConfig =
         config as SelfHostedConversationConfig;
-      let sessionId = sessionStorage.getItem("sessionId");
-      if (sessionId == undefined) {
-        sessionId = uuidv4();
-        sessionStorage.setItem("sessionId", sessionId);
+      let conversationId = selfHostedConversationConfig.conversationId;
+      if (!conversationId) {
+        let sessionId = sessionStorage.getItem("sessionId");
+        if (sessionId == undefined) {
+          sessionId = uuidv4();
+          sessionStorage.setItem("sessionId", sessionId);
+        }
+        conversationId = sessionId;
       }
       startMessage = getAudioConfigStartMessage(
         inputAudioMetadata,
         outputAudioMetadata,
         selfHostedConversationConfig.chunkSize,
         selfHostedConversationConfig.downsampling,
-        selfHostedConversationConfig.conversationId,
-        sessionId,
+        conversationId,
       );
     }
 
     socket.send(stringify(startMessage));
     console.log("Access to microphone granted");
+    console.log(startMessage);
 
     let recorderToUse = recorder;
     if (recorderToUse && recorderToUse.state === "paused") {
