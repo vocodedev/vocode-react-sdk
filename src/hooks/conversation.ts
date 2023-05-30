@@ -173,7 +173,8 @@ export const useConversation = (
     outputAudioMetadata: { samplingRate: number; audioEncoding: AudioEncoding },
     chunkSize: number | undefined,
     downsampling: number | undefined,
-    conversationId: string | undefined
+    conversationId: string | undefined,
+    transcript: boolean | undefined
   ): AudioConfigStartMessage => ({
     type: "websocket_audio_config_start",
     inputAudioConfig: {
@@ -187,6 +188,7 @@ export const useConversation = (
       audioEncoding: outputAudioMetadata.audioEncoding,
     },
     conversationId,
+    transcript,
   });
 
   const startConversation = async () => {
@@ -213,10 +215,12 @@ export const useConversation = (
     };
     socket.onmessage = (event) => {
       const message = JSON.parse(event.data);
-      if (message.type === "websocket_audio" || message.type === "websocket_audio_ext") {
+      if (message.type === "websocket_audio" ) {
         setAudioQueue((prev) => [...prev, Buffer.from(message.data, "base64")]);
       } else if (message.type === "websocket_ready") {
         setStatus("connected");
+      } else if (message.type == "websocket_transcript") {
+        // TO DO
       }
     };
     socket.onclose = () => {
@@ -298,7 +302,8 @@ export const useConversation = (
         outputAudioMetadata,
         selfHostedConversationConfig.chunkSize,
         selfHostedConversationConfig.downsampling,
-        selfHostedConversationConfig.conversationId
+        selfHostedConversationConfig.conversationId,
+        selfHostedConversationConfig.transcript,
       );
     }
 

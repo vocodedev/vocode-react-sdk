@@ -32,6 +32,7 @@ export type SelfHostedConversationConfig = {
   timeSlice?: number;
   chunkSize?: number;
   downsampling?: number;
+  transcript?: boolean;
 };
 
 export type AudioMetadata = {
