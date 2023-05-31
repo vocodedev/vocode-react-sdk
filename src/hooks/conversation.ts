@@ -221,6 +221,7 @@ export const useConversation = (
         setStatus("connected");
       } else if (message.type == "websocket_transcript") {
         // TO DO
+        console.log(message);
       }
     };
     socket.onclose = () => {
@@ -309,6 +310,7 @@ export const useConversation = (
 
     socket.send(stringify(startMessage));
     console.log("Access to microphone granted");
+    console.log(startMessage);
 
     let recorderToUse = recorder;
     if (recorderToUse && recorderToUse.state === "paused") {
