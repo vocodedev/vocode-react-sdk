@@ -33,6 +33,7 @@ export const useConversation = (
   stop: () => void;
   error: Error | undefined;
   analyserNode: AnalyserNode | undefined;
+  transcripts: {text: string; sender: string}[];
 } => {
   const [audioContext, setAudioContext] = React.useState<AudioContext>();
   const [audioAnalyser, setAudioAnalyser] = React.useState<AnalyserNode>();
@@ -42,6 +43,7 @@ export const useConversation = (
   const [socket, setSocket] = React.useState<WebSocket>();
   const [status, setStatus] = React.useState<ConversationStatus>("idle");
   const [error, setError] = React.useState<Error>();
+  const [transcripts, setTranscripts] = React.useState<{text: string; sender: string}[]>([]);
 
   // get audio context and metadata about user audio
   React.useEffect(() => {
@@ -174,7 +176,7 @@ export const useConversation = (
     chunkSize: number | undefined,
     downsampling: number | undefined,
     conversationId: string | undefined,
-    transcript: boolean | undefined
+    subscribeTranscript: boolean | undefined
   ): AudioConfigStartMessage => ({
     type: "websocket_audio_config_start",
     inputAudioConfig: {
@@ -188,7 +190,7 @@ export const useConversation = (
       audioEncoding: outputAudioMetadata.audioEncoding,
     },
     conversationId,
-    transcript,
+    subscribeTranscript,
   });
 
   const startConversation = async () => {
@@ -220,8 +222,7 @@ export const useConversation = (
       } else if (message.type === "websocket_ready") {
         setStatus("connected");
       } else if (message.type == "websocket_transcript") {
-        // TO DO
-        console.log(message);
+        setTranscripts((prev) => [...prev, {"sender": message.sender, "text": message.text}]);
       }
     };
     socket.onclose = () => {
@@ -304,7 +305,7 @@ export const useConversation = (
         selfHostedConversationConfig.chunkSize,
         selfHostedConversationConfig.downsampling,
         selfHostedConversationConfig.conversationId,
-        selfHostedConversationConfig.transcript,
+        selfHostedConversationConfig.subscribeTranscript,
       );
     }
 
@@ -350,5 +351,6 @@ export const useConversation = (
     stop: stopConversation,
     error,
     analyserNode: audioAnalyser,
+    transcripts,
   };
 };

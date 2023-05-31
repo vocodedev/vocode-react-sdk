@@ -40,7 +40,7 @@ export interface AudioConfigStartMessage extends WebSocketMessage {
   inputAudioConfig: InputAudioConfig;
   outputAudioConfig: OutputAudioConfig;
   conversationId?: string;
-  transcript?: boolean;
+  subscribeTranscript?: boolean;
 }
 
 export interface AudioMessage extends WebSocketMessage {
