@@ -9,6 +9,7 @@ import {
   ConversationConfig,
   ConversationStatus,
   SelfHostedConversationConfig,
+  Transcript,
 } from "../types/conversation";
 import { blobToBase64, stringify } from "../utils";
 import { AudioEncoding } from "../types/vocode/audioEncoding";
@@ -33,7 +34,7 @@ export const useConversation = (
   stop: () => void;
   error: Error | undefined;
   analyserNode: AnalyserNode | undefined;
-  transcripts: {text: string; sender: string}[];
+  transcripts: Transcript[];
 } => {
   const [audioContext, setAudioContext] = React.useState<AudioContext>();
   const [audioAnalyser, setAudioAnalyser] = React.useState<AnalyserNode>();
@@ -43,7 +44,7 @@ export const useConversation = (
   const [socket, setSocket] = React.useState<WebSocket>();
   const [status, setStatus] = React.useState<ConversationStatus>("idle");
   const [error, setError] = React.useState<Error>();
-  const [transcripts, setTranscripts] = React.useState<{text: string; sender: string}[]>([]);
+  const [transcripts, setTranscripts] = React.useState<Transcript[]>([]);
 
   // get audio context and metadata about user audio
   React.useEffect(() => {
@@ -222,7 +223,24 @@ export const useConversation = (
       } else if (message.type === "websocket_ready") {
         setStatus("connected");
       } else if (message.type == "websocket_transcript") {
-        setTranscripts((prev) => [...prev, {"sender": message.sender, "text": message.text}]);
+        setTranscripts((prev) => {
+          let last = prev.pop()
+          if (last && last.sender === message.sender) {
+            prev.push({
+              sender: message.sender,
+              text: last.text + " " + message.text
+            })
+          } else {
+            if (last) {
+              prev.push(last);
+            }
+            prev.push({
+              sender: message.sender,
+              text: message.text
+            });
+          }
+          return prev;
+        });
       }
     };
     socket.onclose = () => {

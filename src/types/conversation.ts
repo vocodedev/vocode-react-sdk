@@ -39,3 +39,8 @@ export type AudioMetadata = {
   samplingRate: number;
   audioEncoding: AudioEncoding;
 };
+
+export type Transcript = {
+  sender: string;
+  text: string;
+}
