@@ -9,6 +9,7 @@ import {
   ConversationConfig,
   ConversationStatus,
   SelfHostedConversationConfig,
+  Transcript,
 } from "../types/conversation";
 import { blobToBase64, stringify } from "../utils";
 import { AudioEncoding } from "../types/vocode/audioEncoding";
@@ -33,6 +34,7 @@ export const useConversation = (
   stop: () => void;
   error: Error | undefined;
   analyserNode: AnalyserNode | undefined;
+  transcripts: Transcript[];
 } => {
   const [audioContext, setAudioContext] = React.useState<AudioContext>();
   const [audioAnalyser, setAudioAnalyser] = React.useState<AnalyserNode>();
@@ -42,6 +44,7 @@ export const useConversation = (
   const [socket, setSocket] = React.useState<WebSocket>();
   const [status, setStatus] = React.useState<ConversationStatus>("idle");
   const [error, setError] = React.useState<Error>();
+  const [transcripts, setTranscripts] = React.useState<Transcript[]>([]);
 
   // get audio context and metadata about user audio
   React.useEffect(() => {
@@ -173,7 +176,8 @@ export const useConversation = (
     outputAudioMetadata: { samplingRate: number; audioEncoding: AudioEncoding },
     chunkSize: number | undefined,
     downsampling: number | undefined,
-    conversationId: string | undefined
+    conversationId: string | undefined,
+    subscribeTranscript: boolean | undefined
   ): AudioConfigStartMessage => ({
     type: "websocket_audio_config_start",
     inputAudioConfig: {
@@ -187,6 +191,7 @@ export const useConversation = (
       audioEncoding: outputAudioMetadata.audioEncoding,
     },
     conversationId,
+    subscribeTranscript,
   });
 
   const startConversation = async () => {
@@ -213,10 +218,29 @@ export const useConversation = (
     };
     socket.onmessage = (event) => {
       const message = JSON.parse(event.data);
-      if (message.type === "websocket_audio") {
+      if (message.type === "websocket_audio" ) {
         setAudioQueue((prev) => [...prev, Buffer.from(message.data, "base64")]);
       } else if (message.type === "websocket_ready") {
         setStatus("connected");
+      } else if (message.type == "websocket_transcript") {
+        setTranscripts((prev) => {
+          let last = prev.pop()
+          if (last && last.sender === message.sender) {
+            prev.push({
+              sender: message.sender,
+              text: last.text + " " + message.text
+            })
+          } else {
+            if (last) {
+              prev.push(last);
+            }
+            prev.push({
+              sender: message.sender,
+              text: message.text
+            });
+          }
+          return prev;
+        });
       }
     };
     socket.onclose = () => {
@@ -298,12 +322,14 @@ export const useConversation = (
         outputAudioMetadata,
         selfHostedConversationConfig.chunkSize,
         selfHostedConversationConfig.downsampling,
-        selfHostedConversationConfig.conversationId
+        selfHostedConversationConfig.conversationId,
+        selfHostedConversationConfig.subscribeTranscript,
       );
     }
 
     socket.send(stringify(startMessage));
     console.log("Access to microphone granted");
+    console.log(startMessage);
 
     let recorderToUse = recorder;
     if (recorderToUse && recorderToUse.state === "paused") {
@@ -343,5 +369,6 @@ export const useConversation = (
     stop: stopConversation,
     error,
     analyserNode: audioAnalyser,
+    transcripts,
   };
 };
