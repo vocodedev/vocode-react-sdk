@@ -128,7 +128,16 @@ export const useConversation = (
       return config.backendUrl;
     } else if ("vocodeConfig" in config) {
       const baseUrl = config.vocodeConfig.baseUrl || VOCODE_API_URL;
-      return `wss://${baseUrl}/conversation?key=${config.vocodeConfig.apiKey}`;
+      const resp = await fetch(`https://${baseUrl}/auth/token`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${config.vocodeConfig.apiKey}`,
+        },
+      });
+      const data = await resp.json();
+      const token = data.token;
+      return `wss://${baseUrl}/conversation?key=${token}`;
     } else {
       throw new Error("Invalid config");
     }
