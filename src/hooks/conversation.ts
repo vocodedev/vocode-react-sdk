@@ -45,6 +45,8 @@ export const useConversation = (
   const [status, setStatus] = React.useState<ConversationStatus>("idle");
   const [error, setError] = React.useState<Error>();
   const [transcripts, setTranscripts] = React.useState<Transcript[]>([]);
+  const [active, setActive] = React.useState(false);
+  const toggleActive = () => setActive(!active);
 
   // get audio context and metadata about user audio
   React.useEffect(() => {
@@ -54,23 +56,28 @@ export const useConversation = (
     setAudioAnalyser(audioAnalyser);
   }, []);
 
+  const recordingDataListener = ({ data }: { data: Blob }) => {
+    blobToBase64(data).then((base64Encoded: string | null) => {
+      if (!base64Encoded) return;
+      const audioMessage: AudioMessage = {
+        type: "websocket_audio",
+        data: base64Encoded,
+      };
+      socket.readyState === WebSocket.OPEN &&
+        socket.send(stringify(audioMessage));
+    });
+  };
+  
   // once the conversation is connected, stream the microphone audio into the socket
   React.useEffect(() => {
     if (!recorder || !socket) return;
     if (status === "connected") {
-      recorder.addEventListener("dataavailable", ({ data }: { data: Blob }) => {
-        blobToBase64(data).then((base64Encoded: string | null) => {
-          if (!base64Encoded) return;
-          const audioMessage: AudioMessage = {
-            type: "websocket_audio",
-            data: base64Encoded,
-          };
-          socket.readyState === WebSocket.OPEN &&
-            socket.send(stringify(audioMessage));
-        });
-      });
+      if (active)
+        recorder.addEventListener("dataavailable", recordingDataListener);
+      else
+        recorder.removeEventListener("dataavailable", recordingDataListener);
     }
-  }, [recorder, socket, status]);
+  }, [recorder, socket, status, active]);
 
   // accept wav audio from webpage
   React.useEffect(() => {
@@ -368,6 +375,7 @@ export const useConversation = (
     start: startConversation,
     stop: stopConversation,
     error,
+    toggleActive,
     analyserNode: audioAnalyser,
     transcripts,
   };
