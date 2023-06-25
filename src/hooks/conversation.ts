@@ -45,7 +45,7 @@ export const useConversation = (
   const [status, setStatus] = React.useState<ConversationStatus>("idle");
   const [error, setError] = React.useState<Error>();
   const [transcripts, setTranscripts] = React.useState<Transcript[]>([]);
-  const [active, setActive] = React.useState(false);
+  const [active, setActive] = React.useState(true);
   const toggleActive = () => setActive(!active);
 
   // get audio context and metadata about user audio
@@ -376,6 +376,8 @@ export const useConversation = (
     stop: stopConversation,
     error,
     toggleActive,
+    active,
+    setActive,
     analyserNode: audioAnalyser,
     transcripts,
   };
