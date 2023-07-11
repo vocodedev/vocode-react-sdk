@@ -8,6 +8,7 @@ import React from "react";
 import {
   ConversationConfig,
   ConversationStatus,
+  CurrentSpeaker,
   SelfHostedConversationConfig,
   Transcript,
 } from "../types/conversation";
@@ -35,10 +36,13 @@ export const useConversation = (
   error: Error | undefined;
   analyserNode: AnalyserNode | undefined;
   transcripts: Transcript[];
+  currentSpeaker: CurrentSpeaker;
 } => {
   const [audioContext, setAudioContext] = React.useState<AudioContext>();
   const [audioAnalyser, setAudioAnalyser] = React.useState<AnalyserNode>();
   const [audioQueue, setAudioQueue] = React.useState<Buffer[]>([]);
+  const [currentSpeaker, setCurrentSpeaker] =
+    React.useState<CurrentSpeaker>("none");
   const [processing, setProcessing] = React.useState(false);
   const [recorder, setRecorder] = React.useState<IMediaRecorder>();
   const [socket, setSocket] = React.useState<WebSocket>();
@@ -90,8 +94,12 @@ export const useConversation = (
           source.buffer = buffer;
           source.connect(audioContext.destination);
           source.connect(audioAnalyser);
+          setCurrentSpeaker("agent");
           source.start(0);
           source.onended = () => {
+            if (audioQueue.length <= 0) {
+              setCurrentSpeaker("user");
+            }
             setProcessing(false);
           };
         });
@@ -108,6 +116,7 @@ export const useConversation = (
 
   const stopConversation = (error?: Error) => {
     setAudioQueue([]);
+    setCurrentSpeaker("none");
     if (error) {
       setError(error);
       setStatus("error");
@@ -209,25 +218,25 @@ export const useConversation = (
     };
     socket.onmessage = (event) => {
       const message = JSON.parse(event.data);
-      if (message.type === "websocket_audio" ) {
+      if (message.type === "websocket_audio") {
         setAudioQueue((prev) => [...prev, Buffer.from(message.data, "base64")]);
       } else if (message.type === "websocket_ready") {
         setStatus("connected");
       } else if (message.type == "websocket_transcript") {
         setTranscripts((prev) => {
-          let last = prev.pop()
+          let last = prev.pop();
           if (last && last.sender === message.sender) {
             prev.push({
               sender: message.sender,
-              text: last.text + " " + message.text
-            })
+              text: last.text + " " + message.text,
+            });
           } else {
             if (last) {
               prev.push(last);
             }
             prev.push({
               sender: message.sender,
-              text: message.text
+              text: message.text,
             });
           }
           return prev;
@@ -314,7 +323,7 @@ export const useConversation = (
         selfHostedConversationConfig.chunkSize,
         selfHostedConversationConfig.downsampling,
         selfHostedConversationConfig.conversationId,
-        selfHostedConversationConfig.subscribeTranscript,
+        selfHostedConversationConfig.subscribeTranscript
       );
     }
 
@@ -361,5 +370,6 @@ export const useConversation = (
     error,
     analyserNode: audioAnalyser,
     transcripts,
+    currentSpeaker,
   };
 };
