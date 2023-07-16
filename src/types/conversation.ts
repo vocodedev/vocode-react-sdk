@@ -5,6 +5,8 @@ import { AudioEncoding } from "./vocode/audioEncoding";
 
 export type ConversationStatus = "idle" | "connecting" | "connected" | "error";
 
+export type CurrentSpeaker = "agent" | "user" | "none";
+
 export type AudioDeviceConfig = {
   inputDeviceId?: string;
   outputDeviceId?: string;
@@ -43,4 +45,4 @@ export type AudioMetadata = {
 export type Transcript = {
   sender: string;
   text: string;
-}
+};
