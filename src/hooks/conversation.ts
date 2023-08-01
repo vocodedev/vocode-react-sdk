@@ -34,6 +34,9 @@ export const useConversation = (
   start: () => void;
   stop: () => void;
   error: Error | undefined;
+  active: boolean;
+  setActive: (active: boolean) => void;
+  toggleActive: () => void;
   analyserNode: AnalyserNode | undefined;
   transcripts: Transcript[];
   currentSpeaker: CurrentSpeaker;
@@ -67,7 +70,7 @@ export const useConversation = (
         type: "websocket_audio",
         data: base64Encoded,
       };
-      socket.readyState === WebSocket.OPEN &&
+      socket?.readyState === WebSocket.OPEN &&
         socket.send(stringify(audioMessage));
     });
   };
