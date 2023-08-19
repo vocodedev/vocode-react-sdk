@@ -31,7 +31,7 @@ export const useConversation = (
   config: ConversationConfig | SelfHostedConversationConfig
 ): {
   status: ConversationStatus;
-  start: () => void;
+  start: () => Promise<void>;
   stop: () => void;
   error: Error | undefined;
   active: boolean;
@@ -46,7 +46,7 @@ export const useConversation = (
   const [audioQueue, setAudioQueue] = React.useState<Buffer[]>([]);
   const [currentSpeaker, setCurrentSpeaker] =
     React.useState<CurrentSpeaker>("none");
-  const [processing, setProcessing] = React.useState(false);
+  const [processing, setProcessing] = React.useState<Boolean>(false);
   const [recorder, setRecorder] = React.useState<IMediaRecorder>();
   const [socket, setSocket] = React.useState<WebSocket>();
   const [status, setStatus] = React.useState<ConversationStatus>("idle");
@@ -54,6 +54,7 @@ export const useConversation = (
   const [transcripts, setTranscripts] = React.useState<Transcript[]>([]);
   const [active, setActive] = React.useState(true);
   const toggleActive = () => setActive(!active);
+  const [audioStream, setAudioStream] = React.useState<MediaStream>();
 
   // get audio context and metadata about user audio
   React.useEffect(() => {
@@ -133,8 +134,9 @@ export const useConversation = (
     } else {
       setStatus("idle");
     }
-    if (!recorder || !socket) return;
+    if (!recorder || !socket || !audioStream) return;
     recorder.stop();
+    audioStream.getTracks().forEach((track) => track.stop());
     const stopMessage: StopMessage = {
       type: "websocket_stop",
     };
@@ -268,7 +270,6 @@ export const useConversation = (
       }, 100);
     });
 
-    let audioStream;
     try {
       const trackConstraints: MediaTrackConstraints = {
         echoCancellation: true,
@@ -280,10 +281,11 @@ export const useConversation = (
         );
         trackConstraints.deviceId = config.audioDeviceConfig.inputDeviceId;
       }
-      audioStream = await navigator.mediaDevices.getUserMedia({
+      const currAudioStream = await navigator.mediaDevices.getUserMedia({
         video: false,
         audio: trackConstraints,
       });
+      setAudioStream(currAudioStream);
     } catch (error) {
       if (error instanceof DOMException && error.name === "NotAllowedError") {
         alert(
@@ -293,6 +295,10 @@ export const useConversation = (
       }
       console.error(error);
       stopConversation(error as Error);
+      return;
+    }
+    if (!audioStream) {
+      stopConversation(new Error("No audio stream"));
       return;
     }
     const micSettings = audioStream.getAudioTracks()[0].getSettings();
@@ -310,7 +316,7 @@ export const useConversation = (
     };
     console.log("Output audio metadata", inputAudioMetadata);
 
-    let startMessage;
+    let startMessage: StartMessage | AudioConfigStartMessage;
     if (
       [
         "transcriberConfig",
@@ -351,13 +357,13 @@ export const useConversation = (
       setRecorder(recorderToUse);
     }
 
-    let timeSlice;
+    let timeSlice: number;
     if ("transcriberConfig" in startMessage) {
       timeSlice = Math.round(
         (1000 * startMessage.transcriberConfig.chunkSize) /
           startMessage.transcriberConfig.samplingRate
       );
-    } else if ("timeSlice" in config) {
+    } else if ("timeSlice" in config && config.timeSlice) {
       timeSlice = config.timeSlice;
     } else {
       timeSlice = 10;
