@@ -134,14 +134,15 @@ export const useConversation = (
     } else {
       setStatus("idle");
     }
-    if (!recorder || !socket || !audioStream) return;
-    recorder.stop();
-    audioStream.getTracks().forEach((track) => track.stop());
-    const stopMessage: StopMessage = {
-      type: "websocket_stop",
-    };
-    socket.send(stringify(stopMessage));
-    socket.close();
+    if (recorder) { recorder.stop() }
+    if (audioStream) { audioStream.getTracks().forEach((track) => track.stop()) }
+    if (socket) {
+      const stopMessage: StopMessage = {
+        type: "websocket_stop",
+      };
+      socket.send(stringify(stopMessage));
+      socket.close();
+    }
   };
 
   const getBackendUrl = async () => {
